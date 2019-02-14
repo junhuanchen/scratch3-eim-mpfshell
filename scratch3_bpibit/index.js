@@ -1,131 +1,17 @@
-# scratch3_eim_mpfshell
-
-How to add to scratch3 ?
-
-Have the following requirements base on [codelab_adapter_extensions](https://github.com/Scratch3Lab/codelab_adapter_extensions).
-
-1. [scratch-gui](https://github.com/LLK/scratch-gui)
-2. [scratch-vm](https://github.com/LLK/scratch-vm)
-3. [scratch3_eim](https://github.com/Scratch3Lab/scratch3_eim)
-
-## scratch-gui
-
-move `scratch3_mpfshell` to `\scratch-vm\src\extensions\scratch3_mpfshell`.
-
-open `index.jsx` in `\Scratch3\scratch-gui\src\lib\libraries\extensions` .
-
-``` javascript
-export default [
-    // After the other plug-ins
-	,{
-        name: 'Mpfshell',
-        extensionId: 'mpfshell',
-        // iconURL: mpfshellImage, // add icon `import mpfshellImage from './mpfshell.png';` if your need.
-        description: (
-            <FormattedMessage
-                defaultMessage="Mpfshell for Scratch3"
-                description="Use mpfshell control micropython."
-                id="gui.extension.Mpfshell.description"
-            />
-        ),
-        featured: true
-    }
-]
-```
-
-![](readme/gui.png)
-
-However, it does not work yet. You need to provide this plugin in your scratch-vm.
-
-## scratch-vm
-
-open `extension-manager.js` in `\Scratch3\scratch-vm\src\extension-support` .
-
-```javascript
-const Scratch3EimBlocks = require('../extensions/scratch3_eim');
-const Scratch3MpfshellBlocks = require('../extensions/scratch3_mpfshell');
-
-const builtinExtensions = {
-    // After the other Extensions
-    eim: Scratch3EimBlocks, // add eim extension
-    mpfshell: Scratch3MpfshellBlocks, // add mpfshell extension
-};
-```
-
-This completes the plug-in offering.
-
-If you click on the plugin and nothing happens, you need to re-click `yarn unlink` and `yarn link` in `scratch-vm`.
-
-## scratch-mpfshell
-
-click image directory.
-
-![](readme/codelab_adapter.png)
-
-move `extensions` to `codelab_adapter\extensions`.
-
-![](readme/checked.png)
-
-checked extension_mpfshell start mpfshell.
-
-into scratch3 select mpfshell extension, let's play!
-
-![](readme/demo.png)
-
-### add bpi:bit support!
-
-We can use micropython firmware based on mpfshell.
-
-According to the building blocks of mpfshell, we can make control blocks of other hardware. Here I take bpibit as an example.
-
-![](readme/bpibit.png)
-
-So we can convert the above definition into a built-in building block.
-
-see `scratch3_bpibit/index.js`
-
-Take this as an example(same as mpfshell).
-
-1. in `extension-manager.js`
-
-```javascript
-const Scratch3BpibitBlocks = require('../extensions/scratch3_bpibit');
-
-const builtinExtensions = {
-    bpibit: Scratch3BpibitBlocks
-};
-```
-
-2. in `index.jsx`
-
-```
-export default [
-    // After the other plug-ins
-    ,{
-        name: 'Bpibit',
-        extensionId: 'bpibit',
-        collaborator: 'Bananapi',
-        description: (
-            <FormattedMessage
-                defaultMessage="Bpibit for Scratch3"
-                description="bpibit"
-                id="gui.extension.bpibit.description"
-            />
-        ),
-        featured: true
-    }
-]
-```
-
-3. in `index.js`
-
-```javascript
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const formatMessage = require('format-message');
 // const MathUtil = require('../../util/math-util');
 
 const Scratch3MpfshellBlocks = require('../scratch3_mpfshell');
+
+/**
+ * Icon svg to be displayed at the left edge of each extension block, encoded as a data URI.
+ * @type {string}
+ */
+// eslint-disable-next-line max-len
+const blockIconURI = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCz/wAARCAAaACADASEAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAABgcFAwT/xAApEAACAgEDAwMDBQAAAAAAAAABAgMEEQUGEgATIQciMTJBURVDYWJx/8QAGAEAAwEBAAAAAAAAAAAAAAAAAQIDBAX/xAAnEQABAwIFAgcAAAAAAAAAAAABAAIDERIFEyExQVHwBDJhcYGxsv/aAAwDAQACEQMRAD8Artrf1Ga2KWgV3162/MRmvIqV2dUD8O8x4luLZwnIjByBjojd1zVtwQVpLGry1IrvBq0NBXgqo6u5eKxZYK2eAAPBgQVf2EgBqudZ7qAFyOJbtbP187n2tJNd0CTFSzUBeVYHVRxhZstyGSFWVSVBf7qcNZNt7gr7m0CtqdccO8is8RYExkqGwf8AQQRkAkMDgZ6N1yBbRQnYl+KXSl0DVmhRpGFjTbE0zBKpYMO4w+h1yWxGxwXLKQObEN7lv9ar3tRsVFeqiFNVit5MMJLKEsxxrwkbEfkMwVuCrxYFSCslLjTvsp21tFV4tUlbvtbmt1rdurXYSXdTPajv1wv7UJ9vMMR4JXkGBJKTZBXbW5tJ2ru8V9q37E1SwwOLkWO+fKmF2U/lQyOq5UuQQQT0YwaE8IPpoOVoet20V0e+m4KdKNq1uRi8vNg1eduJJABAwwRj8Hyz58lMcKPqetx9M1GDTHtbsgUxyySvyhkjSNhniSFTw7sSoBHFhni7dWMYcwO6bqQeQ4hZ2lbL3Du6Du69an06hAxFaWcqsCBvLCKPI9vuUrxAQhSAR4xR9obHbS55cxNDWhJSCScI1hlyuQSB/XA+PAX6gBjmSyHxL8iLyjcrS2kLcx+54Svf0MU/p7ryzRpIooyuA6ggMqkqfP3BAIP2I6iVuhTqnZ81epBDLJVMrvHGFZnFeJgxI+SGJOfyc9aJ3ObHoev5KnGAXa+n2q1pteGbXklliSSThOeTKCcrOAvn+B4H46QSE/OT0mFgZA+VDECcxf/Z';
+const menuIconURI = blockIconURI; 
 
 class Scratch3BpibitBlocks {
     constructor (runtime) {
@@ -230,13 +116,3 @@ class Scratch3BpibitBlocks {
 }
 
 module.exports = Scratch3BpibitBlocks;
-
-```
-
-then your see this.
-
-![](readme/bit.png)
-
-![](readme/list.png)
-
-make hardware for scratch3 by yourself. let go!
