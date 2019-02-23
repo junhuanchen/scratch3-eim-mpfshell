@@ -14,6 +14,7 @@ const blockIconURI = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAc
 const menuIconURI = blockIconURI; 
 
 class Scratch3BpibitBlocks {
+
     constructor (runtime) {
         /**
          * The runtime instantiating this block package.
@@ -21,6 +22,9 @@ class Scratch3BpibitBlocks {
          */
         this.runtime = runtime;
         this.mpfshell = new Scratch3MpfshellBlocks();
+        this.mpfshell.eim.socket.isconnected = false;
+        this.mpfshell.eim.socket.on("sensor", this.check_connect);
+        this.mpfshell.isconnected();
     }
 
     /**
@@ -57,7 +61,7 @@ class Scratch3BpibitBlocks {
                     text: formatMessage({
                         id: 'bpibit.connect',
                         default: 'connect [DATA]',
-                        description: 'connect micropython device.'
+                        description: 'connect bpibit device.'
                     }),
                     arguments: {
                         DATA: {
@@ -88,12 +92,41 @@ class Scratch3BpibitBlocks {
                             })
                         }
                     }
+                },
+                {
+                    opcode: 'close',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'bpibit.close',
+                        default: 'close',
+                        description: 'close bpibit'
+                    })
                 }
             ],
             menus: {
 
             }
         };
+    }
+
+    check_connect (msg) {
+        if (msg.message.topic === 'eim/mpfshell/isconnected') {
+            if (msg.message.payload === 'True') {
+                this.isconnected = true;
+            } else {
+                this.isconnected = false;
+            }
+        } else if (msg.message.topic === 'eim/mpfshell/close') {
+            this.isconnected = false;
+        } else if (msg.message.topic === 'eim/mpfshell/open') {
+            if (msg.message.payload === 'Already connected') {
+                this.isconnected = true;
+            } else {
+                this.isconnected = false;
+            }
+        }
+        
+        // console.log(this);
     }
 
     display (args) {
@@ -104,13 +137,20 @@ class Scratch3BpibitBlocks {
 
     connect (DATA) {
         this.mpfshell.open(DATA);
+        this.mpfshell.eim.socket.off("sensor", this.check_connect);
+        this.mpfshell.eim.socket.on("sensor", this.check_connect);
+        this.mpfshell.isconnected();
         this.mpfshell.exec({mutation: null, TOPIC: 'eim/mpfshell/exec', DATA: 'from microbit import *'});
     }
 
-    isconnected () {
-        this.mpfshell.isconnected();
+    close () {
+        this.mpfshell.close();
+        this.mpfshell.eim.socket.off("sensor", this.check_connect);
+        this.mpfshell.eim.socket.isconnected = false;
+    }
 
-        return this.mpfshell.return_info();
+    isconnected () {
+        return this.mpfshell.eim.socket.isconnected;
     }
 
 }

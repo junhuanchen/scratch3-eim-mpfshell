@@ -69,11 +69,6 @@ class Scratch3MpfshellBlocks {
                     arguments: {}
                 },
                 {
-                    opcode: 'isconnect',
-                    blockType: BlockType.REPORTER,
-                    arguments: {}
-                },
-                {
                     opcode: 'open',
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
