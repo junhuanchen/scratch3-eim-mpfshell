@@ -28,7 +28,8 @@ import wedoButtonImage from './peripheral-connection/wedo/wedo-button-illustrati
 import helloworldImage from './helloworld.png';
 import helloworldInsetImage from './helloworld-small.svg';
 
-import mpfshellImage from './ts.png';
+import mpfshellImage from './mpfshell.png';
+import BananapiImage from './bananapi.png';
 
 export default [
     {
@@ -240,20 +241,6 @@ export default [
 
     },
     {
-        name: 'Mpfshell',
-        extensionId: 'mpfshell',
-        collaborator: 'JunhuanChen',
-        iconURL: mpfshellImage,
-        description: (
-            <FormattedMessage
-                defaultMessage="Mpfshell for Scratch3"
-                description="Use mpfshell control micropython."
-                id="gui.extension.Mpfshell.description"
-            />
-        ),
-        featured: true
-    },
-    {
         name: 'EIM',
         extensionId: 'eim',
         iconURL: helloworldImage,
@@ -268,9 +255,24 @@ export default [
         featured: true
     },
     {
+        name: 'Mpfshell',
+        extensionId: 'mpfshell',
+        collaborator: 'JunhuanChen',
+        iconURL: mpfshellImage,
+        description: (
+            <FormattedMessage
+                defaultMessage="Mpfshell for Scratch3"
+                description="Use mpfshell control micropython."
+                id="gui.extension.Mpfshell.description"
+            />
+        ),
+        featured: true
+    },
+    {
         name: 'Bpibit',
         extensionId: 'bpibit',
         collaborator: 'Bananapi',
+        iconURL: BananapiImage,
         description: (
             <FormattedMessage
                 defaultMessage="Bpibit for Scratch3"

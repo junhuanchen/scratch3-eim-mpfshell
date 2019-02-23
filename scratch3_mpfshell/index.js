@@ -64,7 +64,12 @@ class Scratch3MpfshellBlocks {
                     }
                 },
                 {
-                    opcode: 'return_info',
+                    opcode: 'message',
+                    blockType: BlockType.REPORTER,
+                    arguments: {}
+                },
+                {
+                    opcode: 'isconnect',
                     blockType: BlockType.REPORTER,
                     arguments: {}
                 },
@@ -105,13 +110,58 @@ class Scratch3MpfshellBlocks {
                             })
                         }
                     }
+                },
+                {
+                    opcode: 'isconnected',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'mpfshell.isconnected',
+                        default: 'isconnected',
+                        description: 'request isconnected'
+                    })
+                },
+                {
+                    opcode: 'close',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'mpfshell.close',
+                        default: 'close',
+                        description: 'request close'
+                    })
+                },
+                {
+                    opcode: 'mpfshell',
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: 'mpfshell.mpfshell',
+                        default: 'mpfshell [TOPIC] [DATA]',
+                        description: 'control mpfshell'
+                    }),
+                    arguments: {
+                        TOPIC: {
+                            type: ArgumentType.STRING,
+                            defaultValue: formatMessage({
+                                id: 'mpfshell.defaultTopicToMpfshell',
+                                default: "exec",
+                                description: 'mpfshell cmd.'
+                            })
+                        },
+                        DATA: {
+                            type: ArgumentType.STRING,
+                            defaultValue: formatMessage({
+                                id: 'mpfshell.defaultDataToMpfshell',
+                                default: "print('mpfshell')",
+                                description: 'mpfshell msg.'
+                            })
+                        }
+                    }
                 }
             ],
             menus: {}
         };
     }
 
-    listenTopic(args) {
+    listenTopic (args) {
         const targetTopic = args.TOPIC;
         if (targetTopic === this.eim.topic) {
             // console.log(`targetMessage: ${args.TOPIC}`);
@@ -121,31 +171,35 @@ class Scratch3MpfshellBlocks {
         }
     }
 
-    isconnected () {
-        this.eim.broadcastTopicMessage({TOPIC: 'eim/mpfshell/isconnected'});
-    }
-
-    close () {
-        // console.log('close');
-        this.eim.broadcastTopicMessage({TOPIC: 'eim/mpfshell/close'});
-    }
-
-    return_info () {
-        // this.eim.broadcastTopicMessage({TOPIC: 'eim/mpfshell/isconnected' });
+    message () {
         // console.log(this.eim.getComingMessage());
         return this.eim.getComingMessage();
     }
 
     open (args) {
-        this.close();
         const message = args.DATA;
-        this.eim.broadcastTopicMessage({mutation: null, TOPIC: 'eim/mpfshell/open', DATA: message });
+        this.eim.broadcastTopicMessage({mutation: null, TOPIC: 'eim/mpfshell/open', DATA: message});
         // console.log(message);
     }
     
+    isconnected () {
+        this.eim.broadcastTopicMessage({mutation: null, TOPIC: 'eim/mpfshell/isconnected'});
+    }
+
     exec (args) {
         const message = args.DATA;
-        this.eim.broadcastTopicMessage({mutation: null, TOPIC: 'eim/mpfshell/exec', DATA: message });
+        this.eim.broadcastTopicMessage({mutation: null, TOPIC: 'eim/mpfshell/exec', DATA: message});
+        // console.log(message);
+    }
+
+    close () {
+        this.eim.broadcastTopicMessage({mutation: null, TOPIC: 'eim/mpfshell/close'});
+        // console.log(message);
+    }
+
+    mpfshell (args) {
+        const message = args.DATA;
+        this.eim.broadcastTopicMessage({mutation: null, TOPIC: 'eim/mpfshell/' + args.TOPIC, DATA: message});
         // console.log(message);
     }
 
