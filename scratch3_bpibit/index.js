@@ -21,10 +21,7 @@ class Scratch3BpibitBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
-        this.mpfshell = new Scratch3MpfshellBlocks();
-        this.mpfshell.eim.socket.isconnected = false;
-        this.mpfshell.eim.socket.on("sensor", this.check_connect);
-        this.mpfshell.isconnected();
+        this.mpfshell = new Scratch3MpfshellBlocks(runtime, '/bpibit');
     }
 
     /**
@@ -109,48 +106,23 @@ class Scratch3BpibitBlocks {
         };
     }
 
-    check_connect (msg) {
-        if (msg.message.topic === 'eim/mpfshell/isconnected') {
-            if (msg.message.payload === 'True') {
-                this.isconnected = true;
-            } else {
-                this.isconnected = false;
-            }
-        } else if (msg.message.topic === 'eim/mpfshell/close') {
-            this.isconnected = false;
-        } else if (msg.message.topic === 'eim/mpfshell/open') {
-            if (msg.message.payload === 'Already connected') {
-                this.isconnected = true;
-            } else {
-                this.isconnected = false;
-            }
-        }
-        
-        // console.log(this);
-    }
-
     display (args) {
-        const cmd = "display.scroll('" + args.DATA + "')";
+        const cmd = 'display.scroll("' + args.DATA + '")';
         // console.log(cmd);
-        this.mpfshell.exec({mutation: null, TOPIC: 'eim/mpfshell/exec', DATA: cmd});
+        this.mpfshell.exec({DATA: cmd});
     }
 
     connect (DATA) {
         this.mpfshell.open(DATA);
-        this.mpfshell.eim.socket.off("sensor", this.check_connect);
-        this.mpfshell.eim.socket.on("sensor", this.check_connect);
-        this.mpfshell.isconnected();
-        this.mpfshell.exec({mutation: null, TOPIC: 'eim/mpfshell/exec', DATA: 'from microbit import *'});
+        this.mpfshell.exec({DATA: 'from microbit import *'});
     }
 
     close () {
         this.mpfshell.close();
-        this.mpfshell.eim.socket.off("sensor", this.check_connect);
-        this.mpfshell.eim.socket.isconnected = false;
     }
 
     isconnected () {
-        return this.mpfshell.eim.socket.isconnected;
+        return this.mpfshell.mp_isconnected;
     }
 
 }
