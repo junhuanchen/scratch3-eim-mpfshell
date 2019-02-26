@@ -34,7 +34,7 @@ class MpfshellExtension(Extension):
     def __init__(self):
         name = type(self).__name__  # class name
         super().__init__(name)
-        self.topic = "eim/mpfshell"
+        self.topic = "eim/mpfshell/"
         self.cache = { } # mpfshell class cache
 
     @contextlib.contextmanager
@@ -105,11 +105,9 @@ class MpfshellExtension(Extension):
                     topic = message.get("topic")
                     if self.TOPIC in topic:
                         data = message.get('payload')
-                            
-                        mpfs_name = message.get("name")
-                        if mpfs_name is None:
-                            mpfs_name = ''
-
+                        obj = topic.split('/')
+                        mpfs_name = 'default' if len(obj) < 4 else obj[3]
+                        self.logger.debug(mpfs_name)
                         if 'open' in topic:
                             message = {
                                 "topic": topic, 
