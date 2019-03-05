@@ -29,7 +29,7 @@ import helloworldImage from './helloworld.png';
 import helloworldInsetImage from './helloworld-small.svg';
 
 import mpfshellImage from './mpfshell.png';
-import BananapiImage from './bananapi.png';
+import WebduinoImage from './webduino.png';
 
 export default [
     {
@@ -269,13 +269,13 @@ export default [
         featured: true
     },
     {
-        name: 'Bpibit',
+        name: 'bpi:bit',
         extensionId: 'bpibit',
         collaborator: 'Bananapi',
-        iconURL: BananapiImage,
+        iconURL: WebduinoImage,
         description: (
             <FormattedMessage
-                defaultMessage="Bpibit for Scratch3"
+                defaultMessage="bpi:bit for scratch3"
                 description="bpibit"
                 id="gui.extension.bpibit.description"
             />
