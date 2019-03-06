@@ -49,9 +49,9 @@ yarn install
 
 关于如何修改和添加积木代码，包括实现，请参考原文内容。
 
-二、如何调用 Mpfshell 的 Adapter 插件的接口，[创建你的第一个Scratch3.0 Extension](https://blog.just4fun.site/create-first-Scratch3-Extension.html)。
+二、如何调用 Mpfshell 的 Adapter 插件的接口，文档在此 [adapter.codelab.club](https://https://adapter.codelab.club/)。
 
-下载 https://codelab-adapter-docs.codelab.club/user_guide/install/ 的软件打开本地，勾选 extension_mpfshell 插件。
+先进入[codelab-adapter](https://adapter.codelab.club/user_guide/install/)并下载 codelab-adapter 的软件，在打开本地后，勾选 extension_mpfshell 插件。
 
 ![adapter.png](./readme/adapter.png)
 
