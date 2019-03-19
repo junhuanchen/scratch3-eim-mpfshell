@@ -78,7 +78,7 @@ class Scratch3MpfshellBlocks {
                     arguments: {
                         TOPIC: {
                             type: ArgumentType.STRING,
-                            defaultValue: 'eim/mpfshell/exec'
+                            defaultValue: 'eim/mpfshell/exec/default'
                         }
                     }
                 },
@@ -243,7 +243,7 @@ class Scratch3MpfshellBlocks {
     mpfshell (args) {
         const command = 'eim/mpfshell/';
         const message = args.DATA;
-        this.eim.broadcastTopicMessage({mutation: null, TOPIC: command + args.TOPIC + this.mp_id, DATA: message});
+        this.eim.broadcastTopicMessage({mutation: null, TOPIC: command + args.TOPIC, DATA: message});
         // console.log(message);
     }
 

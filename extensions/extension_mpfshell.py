@@ -26,7 +26,7 @@ def find_devices(ids = [(0x1A86, 0x7523), ]):
     return devs
 
 import json
-
+import threading
 from mp.mpfshell import MpFileShell
 
 class MpfshellExtension(Extension):
@@ -36,6 +36,7 @@ class MpfshellExtension(Extension):
         super().__init__(name)
         self.topic = "eim/mpfshell/"
         self.cache = { } # mpfshell class cache
+        self.locks = { } # mpfshell lock cache
 
     @contextlib.contextmanager
     def stdoutIO(self, stdout=None):
@@ -61,13 +62,12 @@ class MpfshellExtension(Extension):
             
             if mpfs_name not in self.cache:
                 self.cache[mpfs_name] = MpFileShell(True, True, True, True)
+                self.locks[mpfs_name] = threading.Lock()
 
             # self.logger.error(self.mpfs._MpFileShell__is_open())
             if self.cache[mpfs_name]._MpFileShell__is_open() is False:
-
                 with self.stdoutIO() as s:
                     self.cache[mpfs_name].do_o(str(dev_name))
-                    
                 output = s.getvalue()
             else:
                 output = 'Already connected'
@@ -80,13 +80,10 @@ class MpfshellExtension(Extension):
     def exec_pycode(self, mpfs_name, mpy_code):
         self.logger.info("exec_pycode : {}".format(mpy_code))
         try:
-            
             # self.logger.error(self.cache[mpfs_name]._MpFileShell__is_open())
             if mpfs_name in self.cache and self.cache[mpfs_name]._MpFileShell__is_open() is True:
-
                 with self.stdoutIO() as s:
                     self.cache[mpfs_name].do_e(str(mpy_code))
-                    
                 output = s.getvalue()
             else:
                 output = 'device not connected'
@@ -95,7 +92,7 @@ class MpfshellExtension(Extension):
             output = str(e)
             self.logger.error(get_traceback())
         return output
-
+    
     def run(self):
         try:
             while self._running:
@@ -107,31 +104,21 @@ class MpfshellExtension(Extension):
                         data = message.get('payload')
                         obj = topic.split('/')
                         mpfs_name = 'default' if len(obj) < 4 else obj[3]
-                        self.logger.debug(mpfs_name)
+                        # self.logger.debug(mpfs_name)
+                        if mpfs_name in self.cache:
+                            with self.locks[mpfs_name]:
+                                if 'exec' in topic:
+                                    message = { "topic": topic, "payload": str(self.exec_pycode(mpfs_name, data)).rstrip() }
+                                    self.publish(message)
+                                if 'isconnected' in topic:
+                                    message = { "topic": topic, "payload": str(self.cache[mpfs_name]._MpFileShell__is_open()) }
+                                    self.publish(message)
+                                if 'close' in topic:
+                                    self.cache[mpfs_name].do_close(None)
+                                    message = { "topic": topic, "payload": str(self.cache[mpfs_name]._MpFileShell__is_open()) }
+                                    self.publish(message)
                         if 'open' in topic:
-                            message = {
-                                "topic": topic, 
-                                "payload": str(self.open_device(mpfs_name, data)).rstrip()
-                            }
-                            self.publish(message)
-                        if 'exec' in topic:
-                            message = {
-                                "topic": topic, 
-                                "payload": str(self.exec_pycode(mpfs_name, data)).rstrip()
-                            }
-                            self.publish(message)
-                        if 'isconnected' in topic:
-                            message = {
-                                "topic": topic,
-                                "payload": str(self.cache[mpfs_name]._MpFileShell__is_open())
-                            }
-                            self.publish(message)
-                        if 'close' in topic:
-                            self.cache[mpfs_name].do_close(None)
-                            message = {
-                                "topic": topic,
-                                "payload": str(self.cache[mpfs_name]._MpFileShell__is_open())
-                            }
+                            message = { "topic": topic, "payload": str(self.open_device(mpfs_name, data)).rstrip() }
                             self.publish(message)
                 except Exception as e:
                     self.logger.error(get_traceback())
