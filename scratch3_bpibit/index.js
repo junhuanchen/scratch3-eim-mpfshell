@@ -55,7 +55,7 @@ class Scratch3BpibitBlocks {
         this.pin_0 = false;
         this.pin_1 = false;
         this.pin_2 = false;
-        this.connect('');
+        this.connect({DATA: '', TIMEOUT: 1000});
     }
 
     /**
@@ -193,7 +193,7 @@ class Scratch3BpibitBlocks {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: 'bpibit.connect',
-                        default: 'connect [DATA]',
+                        default: 'connect [DATA] [TIMEOUT]',
                         description: 'connect bpibit device.'
                     }),
                     arguments: {
@@ -203,6 +203,14 @@ class Scratch3BpibitBlocks {
                                 id: 'bpibit.defaultArgsToOpen',
                                 default: '',
                                 description: 'connect device name(default is none to find).'
+                            })
+                        },
+                        TIMEOUT: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: formatMessage({
+                                id: 'bpibit.defaultArgsToTimeOut',
+                                default: '1000',
+                                description: 'device control setInterval timeout.'
                             })
                         }
                     }
@@ -327,20 +335,23 @@ class Scratch3BpibitBlocks {
         };
     }
 
-    connect (DATA) {
-        this.mpfshell.open(DATA);
+    connect (args) {
+        // console.log(args);
+        this.mpfshell.open(args.DATA);
         this.mpfshell.exec({DATA: 'from microbit import *'});
 
         this.mpfshell.eim.socket.off('sensor', this.respond_data);
         this.mpfshell.eim.socket.on('sensor', this.respond_data);
+        
 
-        setInterval(() => {
+        clearInterval(this.interval);
+        this.interval = setInterval(() => {
             this.request_data();
-        }, 1000);
-
+        }, args.TIMEOUT);
     }
 
     close () {
+        clearInterval(this.interval);
         this.mpfshell.eim.socket.off('sensor', this.respond_data);
         this.mpfshell.close();
     }
